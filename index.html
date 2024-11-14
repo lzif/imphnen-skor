@@ -1,159 +1,167 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      Pengecekan Kemalasan - Grup FB IMPHNEN (Ingin Menjadi Programmer Handal Namun Enggan Ngoding)
-    </title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 40px;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    Pengecekan Kemalasan - Grup FB IMPHNEN (Ingin Menjadi Programmer Handal Namun Enggan Ngoding)
+  </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #4682b4;
+    }
+
+    #result {
+      font-size: 20px;
+      margin-top: 15px;
+      color: #4682b4;
+    }
+
+    input,
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin: 5px;
+      background-color: #b0e0e6;
+      border: 1px solid #87cefa;
+      color: #4682b4;
+      outline: none;
+    }
+
+    button:hover {
+      background-color: #87cefa;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto;
+      border: 4px solid #e0ffff;
+      border-top: 4px solid #4682b4;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    #loading-message {
+      color: #4682b4;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
       }
 
-      h1 {
-        color: #4682b4;
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Pengecekan Skor Kemalasan IMPHNEN</h1>
+  <input type="text" id="username" placeholder="Masukin username GitHub" />
+  <button onclick="checkActivity()">Cek Seberapa Malas</button>
+  <div id="result"></div>
+  <div id="message"></div>
+
+  <div class="loading-spinner" style="display: none">
+    <div class="spinner"></div>
+    <p id="loading-message">Loading...</p>
+  </div>
+
+  <script>
+    async function checkActivity() {
+      const username = document.getElementById("username").value;
+      const resultDiv = document.getElementById("result");
+      const messageDiv = document.getElementById("message");
+
+      if (!username) {
+        resultDiv.textContent = "Isi dulu usernamenya! Biji";
+        messageDiv.textContent = "";
+        return;
       }
 
-      #result {
-        font-size: 20px;
-        margin-top: 15px;
-        color: #4682b4;
-      }
+      try {
+        let events = [];
+        let page = 1;
+        let fetchMore = true;
 
-      input,
-      button {
-        padding: 10px 15px;
-        font-size: 16px;
-        margin: 5px;
-        background-color: #b0e0e6;
-        border: 1px solid #87cefa;
-        color: #4682b4;
-        outline: none;
-      }
-
-      button:hover {
-        background-color: #87cefa;
-      }
-
-      .loading-spinner {
-        text-align: center;
-        padding: 20px;
-      }
-
-      .spinner {
-        width: 40px;
-        height: 40px;
-        margin: 0 auto;
-        border: 4px solid #e0ffff;
-        border-top: 4px solid #4682b4;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      #loading-message {
-        color: #4682b4;
-      }
-
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <h1>Pengecekan Skor Kemalasan IMPHNEN</h1>
-    <input type="text" id="username" placeholder="Masukin username GitHub" />
-    <button onclick="checkActivity()">Cek Seberapa Malas</button>
-    <div id="result"></div>
-    <div id="message"></div>
-
-    <div class="loading-spinner" style="display: none">
-      <div class="spinner"></div>
-      <p id="loading-message">Loading...</p>
-    </div>
-
-    <script>
-      async function checkActivity() {
-        const username = document.getElementById("username").value;
-        const resultDiv = document.getElementById("result");
-        const messageDiv = document.getElementById("message");
-
-        if (!username) {
-          resultDiv.textContent = "Isi dulu usernamenya! Biji";
-          messageDiv.textContent = "";
-          return;
-        }
-
-        try {
-          let events = [];
-          let page = 1;
-          let fetchMore = true;
-
-          isLoading(true, "Sedang mengecek aktivitas...");
-          while (fetchMore) {
-            const response = await fetch(
-              `https://api.github.com/users/${username}/events?page=${page}`,
-            );
-            const data = await response.json();
-            if (response.status == 403) {
-              throw new Error("Batasan API GitHub terlampaui");
-            }
-            if (data.length > 0) {
-              events = events.concat(data);
-              page++;
-            } else {
-              fetchMore = false;
-            }
-          }
-          isLoading(false);
-          const oneYearAgo = new Date();
-          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-          const recentEvents = events.filter(
-            (event) => new Date(event.created_at) >= oneYearAgo,
+        isLoading(true, "Sedang mengecek aktivitas...");
+        while (fetchMore) {
+          const response = await fetch(
+            `https://api.github.com/users/${username}/events?page=${page}`,
           );
+          const data = await response.json();
+          if (response.status == 403) {
+            throw new Error("Batasan API GitHub terlampaui");
+          }
+          if (response.status == 404) {
+            throw new Error("Username gak ada. <br/>Harus pake username akun github cik.")
+          }
+          if (data.length > 0) {
+            events = events.concat(data);
+            page++;
+          } else {
+            fetchMore = false;
+          }
+        }
+        isLoading(false);
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-          const eventCount = recentEvents.length;
-          const lazinessScore = 100 - Math.min(eventCount, 100);
-          resultDiv.textContent = `Skor Kemalasan ${username}: ${lazinessScore}`;
+        const recentEvents = events.filter(
+          (event) => new Date(event.created_at) >= oneYearAgo,
+        );
 
-          isLoading(true, "Sedang membuat pesan...");
-          messageDiv.textContent = "Loading...";
+        const eventCount = recentEvents.length;
+        const lazinessScore = 100 - Math.min(eventCount, 100);
+        resultDiv.textContent = `Skor Kemalasan ${username}: ${lazinessScore}`;
 
-          const aiMessage = await generateMessage(lazinessScore);
-          isLoading(false);
+        isLoading(true, "Sedang membuat pesan...");
+        messageDiv.textContent = "Loading...";
 
-          messageDiv.textContent = aiMessage;
-        } catch (error) {
-          resultDiv.textContent = "Ups, error nih! Coba lagi nanti ya.";
-          messageDiv.textContent = error.message;
+        const aiMessage = await generateMessage(lazinessScore);
+        isLoading(false);
+
+        messageDiv.textContent = aiMessage;
+      } catch (error) {
+        isLoading(false)
+        if (!error.message) {
+          resultDiv.textContent = "Ups, error njir! Coba lagi nanti.";
+        } else {
+          messageDiv.innerHTML = error.message;
         }
       }
-      async function generateMessage(skor) {
-        const API_URL = "https://api.deepenglish.com/api/gpt_open_ai/chatnew";
+    }
+    async function generateMessage(skor) {
+      const API_URL = "https://api.deepenglish.com/api/gpt_open_ai/chatnew";
 
-        const DEFAULT_OPTIONS = {
-          temperature: 0.3,
-          top_p: 0.7,
-          top_k: 40,
-          max_tokens: 1080,
-        };
-        try {
-          const requestBody = {
-            messages: [
-              {
-                role: "system",
-                content: `Berdasarkan skor kemalasan pengguna yang berkisar antara 0 hingga 100, buatlah pesan dan saran yang sesuai dengan ketentuan berikut:
+      const DEFAULT_OPTIONS = {
+        temperature: 0.3,
+        top_p: 0.7,
+        top_k: 40,
+        max_tokens: 1080,
+      };
+      try {
+        const requestBody = {
+          messages: [
+            {
+              role: "system",
+              content: `Berdasarkan skor kemalasan pengguna yang berkisar antara 0 hingga 100, buatlah pesan dan saran yang sesuai dengan ketentuan berikut:
 
 - Skor 0 hingga 30: Berikan pesan peringatan keras yang menyatakan bahwa pengguna terlalu rajin dan terancam dikeluarkan dari grup. Gunakan nada sarkastik dan humoris, serta bahasa gaul yang santai. Sertakan ancaman tegas.
 
@@ -162,47 +170,48 @@
 - Skor 71 hingga 100: Berikan pesan positif yang menyatakan bahwa pengguna sangat malas dan disayang oleh admin. Gunakan bahasa gaul yang hangat dan humoris.
 
 Pastikan setiap pesan disampaikan dengan nada santai, humoris, dan sesuai dengan konteks grup.`,
-              },
-              {
-                role: "user",
-                content: `Skor Kemalasan: ${skor}`,
-              },
-            ],
-            ...DEFAULT_OPTIONS,
-          };
-
-          const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization:
-                "Bearer UFkOfJaclj61OxoD7MnQknU1S2XwNdXMuSZA+EZGLkc=",
             },
-            body: JSON.stringify(requestBody),
-          });
+            {
+              role: "user",
+              content: `Skor Kemalasan: ${skor}`,
+            },
+          ],
+          ...DEFAULT_OPTIONS,
+        };
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer UFkOfJaclj61OxoD7MnQknU1S2XwNdXMuSZA+EZGLkc=",
+          },
+          body: JSON.stringify(requestBody),
+        });
 
-          const data = await response.json();
-          return data.message;
-        } catch (error) {
-          let errorMsg =
-            error instanceof Error
-              ? error.message
-              : "An unknown error occurred";
-          return errorMsg;
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+        return data.message;
+      } catch (error) {
+        let errorMsg =
+          error instanceof Error
+            ? error.message
+            : "An unknown error occurred";
+        return errorMsg;
       }
-      function isLoading(bool, msg) {
-        if (bool) {
-          document.querySelector(".loading-spinner").style.display = "block";
-          document.getElementById("loading-message").textContent = msg;
-        } else {
-          document.querySelector(".loading-spinner").style.display = "none";
-        }
+    }
+    function isLoading(bool, msg) {
+      if (bool) {
+        document.querySelector(".loading-spinner").style.display = "block";
+        document.getElementById("loading-message").textContent = msg;
+      } else {
+        document.querySelector(".loading-spinner").style.display = "none";
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
+
 </html>
